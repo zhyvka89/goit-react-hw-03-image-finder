@@ -1,7 +1,5 @@
 import { Component } from 'react';
-// import ImagesApi from '../../services/apiImageService';
-
-// const imageApi = new ImagesApi();
+import styles from './Searchbar.module.css';
 
 export default class Searchbar extends Component {
   state = {
@@ -10,27 +8,22 @@ export default class Searchbar extends Component {
 
   handleImageNameChange = e => {
     this.setState({ imageName: e.currentTarget.value.toLowerCase() });
-    // imageApi.query = this.state.imageName;
   };
 
   handlerSubmit = e => {
     e.preventDefault();
     this.props.onSubmit(this.state.imageName);
-    // imageApi.query = this.state.imageName;
-    // const images = imageApi.fatchImages();
-    // console.log(images);
     this.setState({ imageName: '' });
   };
 
   render() {
     return (
-      <header>
-        <form onSubmit={this.handlerSubmit}>
-          <button type="submit">
-            <span>Search</span>
-          </button>
+      <header className={styles.searchbar}>
+        <form onSubmit={this.handlerSubmit} className={styles.searchForm}>
+          <button type="submit" className={styles.button}></button>
 
           <input
+            className={styles.input}
             type="text"
             autoComplete="off"
             autoFocus

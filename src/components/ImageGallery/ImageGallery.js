@@ -1,73 +1,91 @@
 import { Component } from 'react';
 
 import ImageGalleryItem from '../ImageGalleryItem';
-import imagesApi from '../../services/apiImageService';
 import Button from '../Button/Button';
+import Modal from '../Modal/Modal';
+
+import styles from './ImageGallery.module.css';
+
 import Loader from 'react-loader-spinner';
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
+
+import ImagesApi from '../../services/apiImageService';
+const imagesApi = new ImagesApi();
 
 export default class ImageGallery extends Component {
   state = {
     images: [],
-    page: 1,
     error: null,
+    showModal: false,
+    largeImage: '',
+    loading: false,
   };
 
-  // componentDidMount() {
-  //   console.log('did mount');
-  //   // this.setState({ page: 1 });
-  // }
-
   componentDidUpdate(prevProps, prevState) {
-    console.log('did update');
-    // console.log(prevProps);
-    console.log(prevState.page);
     const prevName = prevProps.imageName;
     const currentName = this.props.imageName;
-    // const page = this.state.page;
 
     if (prevName !== currentName) {
+      this.setState({ images: [] });
+      imagesApi.query = currentName;
+      imagesApi.resetPage();
       this.getImages();
-      // this.setState({ page: 1 });
-      //   imagesApi
-      //   .fetchImages(currentName, page)
-      //     .then(({ hits }) => this.setState((prevState) => ({
-      //       images: [...prevState.images, ...hits],
-      //       page: 1,
-      //     })))
-      //   .catch(error => this.setState({ error }));
     }
+
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: 'smooth',
+    });
   }
 
+  toggleModal = () => {
+    this.setState(prevState => ({
+      showModal: !prevState.showModal,
+    }));
+  };
+
+  handleLargeImage = image => {
+    this.setState({ largeImage: image });
+  };
+
   handleBtnClick = () => {
-    console.log('button');
     this.getImages();
-    // this.setState(prevState => ({ page: prevState.page + 1 }));
-    // imagesApi
-    //   .fetchImages(this.props.imageName, this.state.page)
-    //   .then(({ hits }) => this.setState((prevState) => ({
-    //     images: [...prevState.images, ...hits],
-    //     page: prevState.page + 1,
-    //   })))
-    //   .catch(error => this.setState({ error }));
   };
 
   getImages = () => {
-    imagesApi
-      .fetchImages(this.props.imageName, this.state.page)
-      .then(({ hits }) =>
-        this.setState(prevState => ({
-          images: [...prevState.images, ...hits],
-          page: prevState.page + 1,
-        })),
-      )
-      .catch(error => this.setState({ error }));
+    this.setState({ loading: true });
+
+    setTimeout(() => {
+      imagesApi
+        .fatchImages()
+        .then(({ hits }) =>
+          this.setState(prevState => ({
+            images: [...prevState.images, ...hits],
+          })),
+        )
+        .catch(error => {
+          this.setState({ error });
+          console.log(error);
+        })
+        .finally(this.setState({ loading: false }));
+    }, 1000);
   };
 
   render() {
     return (
       <>
-        <ul>
+        {this.state.showModal && (
+          <Modal onCloseModal={this.toggleModal}>
+            <img
+              src={this.state.largeImage}
+              alt="pics"
+              width="680"
+              height="500"
+            />
+          </Modal>
+        )}
+
+        <ul className={styles.gallery}>
           {this.state.images.map(image => {
             return (
               <ImageGalleryItem
@@ -75,18 +93,26 @@ export default class ImageGallery extends Component {
                 id={image.id}
                 largeImage={image.largeImageURL}
                 tags={image.tags}
+                toggleModal={this.toggleModal}
+                handleLargeImage={this.handleLargeImage}
               />
             );
           })}
         </ul>
-        <Button title="LoadMore" cbonClick={this.handleBtnClick} />
-        <Loader
-          type="Bars"
-          color="#00BFFF"
-          height={80}
-          width={80}
-          timeout={3000}
-        />
+
+        {this.state.images.length > 0 && (
+          <Button title="Load More" cbonClick={this.handleBtnClick} />
+        )}
+
+        {this.state.loading && (
+          <Loader
+            type="Bars"
+            color="#00BFFF"
+            height={50}
+            width={50}
+            timeout={1000}
+          />
+        )}
       </>
     );
   }

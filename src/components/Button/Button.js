@@ -1,8 +1,12 @@
+import styles from './Button.module.css';
+
 const Button = ({ title, type = 'button', cbonClick }) => {
   return (
-    <button type={type} onClick={cbonClick}>
-      {title}
-    </button>
+    <div className={styles.buttonThumb}>
+      <button type={type} onClick={cbonClick} className={styles.button}>
+        {title}
+      </button>
+    </div>
   );
 };
 
