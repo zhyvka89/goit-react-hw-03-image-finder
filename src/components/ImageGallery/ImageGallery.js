@@ -1,4 +1,5 @@
 import { Component } from 'react';
+import PropTypes from 'prop-types';
 
 import ImageGalleryItem from '../ImageGalleryItem';
 import Button from '../Button/Button';
@@ -19,6 +20,10 @@ export default class ImageGallery extends Component {
     showModal: false,
     largeImage: '',
     loading: false,
+  };
+
+  PropTypes = {
+    imageName: PropTypes.string.isRequired,
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -72,27 +77,24 @@ export default class ImageGallery extends Component {
   };
 
   render() {
+    const { showModal, loading, images, largeImage } = this.state;
+
     return (
       <>
-        {this.state.showModal && (
+        {showModal && (
           <Modal onCloseModal={this.toggleModal}>
-            <img
-              src={this.state.largeImage}
-              alt="pics"
-              width="680"
-              height="500"
-            />
+            <img src={largeImage} alt="pics" width="680" height="500" />
           </Modal>
         )}
 
         <ul className={styles.gallery}>
-          {this.state.images.map(image => {
+          {images.map(({ webformatURL, id, tags, largeImageURL }) => {
             return (
               <ImageGalleryItem
-                url={image.webformatURL}
-                id={image.id}
-                largeImage={image.largeImageURL}
-                tags={image.tags}
+                url={webformatURL}
+                id={id}
+                largeImage={largeImageURL}
+                tags={tags}
                 toggleModal={this.toggleModal}
                 handleLargeImage={this.handleLargeImage}
               />
@@ -100,14 +102,14 @@ export default class ImageGallery extends Component {
           })}
         </ul>
 
-        {this.state.images.length > 0 && (
+        {images.length > 0 && !loading && (
           <Button title="Load More" cbonClick={this.handleBtnClick} />
         )}
 
-        {this.state.loading && (
+        {loading && (
           <Loader
             type="Bars"
-            color="#00BFFF"
+            color="#3f51b5"
             height={50}
             width={50}
             timeout={1000}

@@ -1,7 +1,12 @@
 import { Component } from 'react';
+import PropTypes from 'prop-types';
 import styles from './Modal.module.css';
 
 export default class Modal extends Component {
+  PropTypes = {
+    onCloseModal: PropTypes.func.isRequired,
+  };
+
   componentDidMount() {
     window.addEventListener('keydown', this.handleKeydown);
   }
